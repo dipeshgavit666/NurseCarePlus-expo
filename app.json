@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "NurseCare+",
+    "slug": "nursecare-plus",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "nursecare",
+    "userInterfaceStyle": "light",
+    "splash": { "backgroundColor": "#0EA5E9" },
+    "ios": { "supportsTablet": false, "bundleIdentifier": "com.nursecare.plus" },
+    "android": {
+      "adaptiveIcon": { "foregroundImage": "./assets/images/adaptive-icon.png", "backgroundColor": "#0EA5E9" },
+      "package": "com.nursecare.plus",
+      "permissions": ["android.permission.CAMERA", "android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.SCHEDULE_EXACT_ALARM"]
+    },
+    "plugins": [
+      "expo-router",
+      ["expo-camera", { "cameraPermission": "Allow NurseCare+ to use the camera to scan QR codes." }],
+      ["expo-notifications", { "icon": "./assets/images/icon.png", "color": "#0EA5E9" }]
+    ],
+    "experiments": { "typedRoutes": true }
+  }
+}
