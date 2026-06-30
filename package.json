@@ -6,7 +6,6 @@
     "@expo/metro-runtime": "~56.0.15",
     "@react-native-async-storage/async-storage": "^3.1.1",
     "expo": "~56.0.12",
-    "expo-barcode-scanner": "^13.0.1",
     "expo-camera": "^56.0.8",
     "expo-constants": "^56.0.18",
     "expo-dev-client": "~56.0.20",
