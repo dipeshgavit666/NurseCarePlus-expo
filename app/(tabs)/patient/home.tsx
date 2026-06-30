@@ -151,12 +151,12 @@ export default function PatientHome() {
         <View style={s.actions}>
           <ActionBtn emoji="❤️" label="Log Health"   color={Colors.success}  onPress={() => router.push("/(tabs)/patient/health")} />
           <ActionBtn emoji="💊" label="Medications"  color={Colors.primary}  onPress={() => router.push("/(tabs)/patient/medications")} />
-          <ActionBtn emoji="🥗" label="Diet Plan"    color={Colors.warning}  onPress={() => {}} />
-          <ActionBtn emoji="⚠️" label="Danger Signs" color={Colors.danger}   onPress={() => router.push("/(tabs)/patient/health")} />
+          <ActionBtn emoji="🥗" label="Diet Plan"    color={Colors.warning}  onPress={() => router.push("/(tabs)/patient/diet")} />
+          <ActionBtn emoji="📅" label="Appointments" color={Colors.nurse}    onPress={() => router.push("/(tabs)/patient/appointments")} />
         </View>
 
         {/* SOS */}
-        <TouchableOpacity style={s.sos} activeOpacity={0.85}>
+        <TouchableOpacity style={s.sos} activeOpacity={0.85} onPress={() => router.push("/(tabs)/patient/sos")}>
           <Text style={s.sosEmoji}>🆘</Text>
           <View style={{ flex: 1 }}>
             <Text style={s.sosTitle}>Emergency SOS</Text>

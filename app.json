@@ -8,16 +8,29 @@
     "scheme": "nursecare",
     "userInterfaceStyle": "light",
     "splash": { "backgroundColor": "#0EA5E9" },
-    "ios": { "supportsTablet": false, "bundleIdentifier": "com.nursecare.plus" },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.nursecare.plus",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "NurseCare+ uses your location to share with caregivers during an SOS emergency."
+      }
+    },
     "android": {
       "adaptiveIcon": { "foregroundImage": "./assets/images/adaptive-icon.png", "backgroundColor": "#0EA5E9" },
       "package": "com.nursecare.plus",
-      "permissions": ["android.permission.CAMERA", "android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.SCHEDULE_EXACT_ALARM"]
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.SEND_SMS"
+      ]
     },
     "plugins": [
       "expo-router",
       ["expo-camera", { "cameraPermission": "Allow NurseCare+ to use the camera to scan QR codes." }],
-      ["expo-notifications", { "icon": "./assets/images/icon.png", "color": "#0EA5E9" }]
+      ["expo-notifications", { "icon": "./assets/images/icon.png", "color": "#0EA5E9" }],
+      ["expo-location", { "locationWhenInUsePermission": "Allow NurseCare+ to access your location for SOS emergencies." }]
     ],
     "experiments": { "typedRoutes": true }
   }

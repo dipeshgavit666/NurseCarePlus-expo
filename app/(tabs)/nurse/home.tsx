@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, type ViewStyle,
+  View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -59,8 +59,8 @@ export default function NurseHome() {
           <View style={s.actions}>
             <QuickAction emoji="➕" label="New Patient"   color={Colors.nurse}   onPress={() => router.push("/(tabs)/nurse/create-patient")} />
             <QuickAction emoji="🧑‍🦽" label="All Patients" color={Colors.patient} onPress={() => router.push("/(tabs)/nurse/patients")} />
-            <QuickAction emoji="💊" label="Medications"  color={Colors.success} onPress={() => {}} />
-            <QuickAction emoji="📅" label="Appointments" color={Colors.warning}  onPress={() => {}} />
+            <QuickAction emoji="💊" label="Medications"  color={Colors.success} onPress={() => router.push("/(tabs)/patient/medications")} />
+            <QuickAction emoji="📅" label="Appointments" color={Colors.warning}  onPress={() => router.push("/(tabs)/patient/appointments")} />
           </View>
         </Card>
 
@@ -81,10 +81,9 @@ export default function NurseHome() {
 }
 
 function StatCard({ emoji, count, label, color }: { emoji: string; count: number; label: string; color: string }) {
-  const style = { ...s.statCard, borderTopColor: color, borderTopWidth: 3 };
-
   return (
-    <Card style={style}>
+    <Card style={[s.statCard, { borderTopColor: color, borderTopWidth: 3 }]}>
+      <Text style={s.statEmoji}>{emoji}</Text>
       <Text style={[s.statCount, { color }]}>{count}</Text>
       <Text style={s.statLabel}>{label}</Text>
     </Card>

@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { patientApi, medicationApi, appointmentApi, healthApi, sosApi, Patient, Medication, Appointment, HealthLog } from "../../../src/api";
 import { useAuth } from "../../../src/context/AuthContext";
 import { Card, Row, SectionHeader, LoadingScreen, EmptyState, Button, Badge } from "../../../src/components/common/UI";
@@ -81,7 +82,7 @@ export default function FamilyHome() {
         </View>
 
         {/* Patient card */}
-        <Card style={StyleSheet.flatten([s.patCard, { borderTopColor: Colors.family, borderTopWidth: 4 }])}>
+        <Card style={[s.patCard, { borderTopColor: Colors.family, borderTopWidth: 4 }]}>
           <Row style={{ gap: 14 }}>
             <View style={s.patAvatar}><Text style={{ fontSize: 32 }}>🧑‍🦽</Text></View>
             <View style={{ flex: 1 }}>
@@ -133,7 +134,7 @@ export default function FamilyHome() {
         {/* Upcoming appointments */}
         {appointments.length > 0 && (
           <>
-            <SectionHeader title="Upcoming Appointments" />
+            <SectionHeader title="Upcoming Appointments" action="View Calendar" onAction={() => router.push("/(tabs)/patient/appointments")} />
             {appointments.slice(0, 3).map(a => (
               <Card key={a._id} style={s.apptCard}>
                 <Row style={{ gap: 12 }}>
