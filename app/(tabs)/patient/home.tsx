@@ -81,14 +81,11 @@ export default function PatientHome() {
 
         {/* Diagnosis */}
         {patient?.diagnosis && (
-          <Card style={[s.dxCard, { borderLeftColor: Colors.patient }]}>
-            <Row style={{ gap: 10 }}>
-              <Text style={{ fontSize: 26 }}>🩺</Text>
-              <View>
-                <Text style={s.dxLabel}>Diagnosis</Text>
-                <Text style={s.dxValue}>{patient.diagnosis}</Text>
-              </View>
-            </Row>
+          <Card style={{ ...s.dxCard, borderLeftColor: Colors.patient }}>
+            <View>
+              <Text style={s.dxLabel}>Diagnosis</Text>
+              <Text style={s.dxValue}>{patient.diagnosis}</Text>
+            </View>
           </Card>
         )}
 
