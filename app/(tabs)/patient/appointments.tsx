@@ -117,7 +117,7 @@ function ApptCard({ appt, faded, canComplete, onComplete }: { appt: Appointment;
   const isTomorrow = date.toDateString() === new Date(Date.now() + 86400000).toDateString();
 
   return (
-    <Card style={[s.apptCard, faded && { opacity: 0.6 }]}>
+    <Card style={faded ? { ...s.apptCard, opacity: 0.6 } : s.apptCard}>
       <Row style={{ gap: 12 }}>
         <View style={s.dateBox}>
           <Text style={s.dateDay}>{date.getDate()}</Text>

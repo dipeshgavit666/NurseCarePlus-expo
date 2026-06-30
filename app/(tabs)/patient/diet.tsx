@@ -75,9 +75,7 @@ export default function Diet() {
 
 function FoodCard({ item, good }: { item: DietItem; good: boolean }) {
   return (
-    <Card style={[s.foodCard, { borderColor: good ? Colors.success + "30" : Colors.danger + "30" }]}>
-      <Text style={s.foodEmoji}>{item.emoji}</Text>
-      <Text style={s.foodName}>{item.name}</Text>
+    <Card style={{ ...s.foodCard, borderColor: good ? Colors.success + "30" : Colors.danger + "30" }}>
       <Text style={[s.foodMark, { color: good ? Colors.success : Colors.danger }]}>
         {good ? "✓" : "✗"}
       </Text>
@@ -105,3 +103,4 @@ const s = StyleSheet.create({
   noteCard:  { backgroundColor: Colors.primaryLight, borderRadius: Radius.md, padding: Spacing.md },
   noteText:  { fontSize: 12, color: Colors.primaryDark, lineHeight: 18 },
 });
+

@@ -114,7 +114,7 @@ export default function Health() {
         {activeTab === "overview" ? (
           <>
             {/* Today's status */}
-            <Card style={[s.statusCard, { borderLeftColor: status.color, borderLeftWidth: 5 }]}>
+            <Card style={StyleSheet.flatten([s.statusCard, { borderLeftColor: status.color, borderLeftWidth: 5 }])}>\
               <Row style={{ gap: 12 }}>
                 <Text style={{ fontSize: 32 }}>{status.label.includes("Stable") ? "💚" : status.label.includes("Monitor") ? "⚠️" : "📋"}</Text>
                 <View>
@@ -228,7 +228,7 @@ export default function Health() {
 
 function VitalCard({ emoji, label, value, unit, color }: { emoji: string; label: string; value: string; unit: string; color: string }) {
   return (
-    <Card style={[s.vitalCard, { borderTopColor: color, borderTopWidth: 3 }]}>
+    <Card style={StyleSheet.flatten([s.vitalCard, { borderTopColor: color, borderTopWidth: 3 }])}>
       <Text style={s.vitalEmoji}>{emoji}</Text>
       <Text style={[s.vitalValue, { color }]}>{value}</Text>
       {unit ? <Text style={s.vitalUnit}>{unit}</Text> : null}
@@ -258,7 +258,7 @@ function DangerSignsCard({ todayLog }: { todayLog?: HealthLog }) {
   const anyYes = Object.values(answers).some(Boolean);
 
   return (
-    <Card style={[s.dangerCard, anyYes && { borderColor: Colors.danger, borderWidth: 2 }]}>
+    <Card style={StyleSheet.flatten([s.dangerCard, anyYes && { borderColor: Colors.danger, borderWidth: 2 }])}>
       <Text style={s.dangerTitle}>⚠️  Danger Signs Checklist</Text>
       <Text style={s.dangerSub}>Are you experiencing any of the following?</Text>
       {signs.map(sign => (

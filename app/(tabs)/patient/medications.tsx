@@ -99,7 +99,7 @@ export default function Medications() {
           });
           return (
             <TouchableOpacity onPress={() => setSelected(item._id)} activeOpacity={0.85}>
-              <Card style={[s.medCard, taken && s.medCardDone]}>
+              <Card style={taken ? { ...s.medCard, ...s.medCardDone } : s.medCard}>
                 <Row style={{ gap: 12 }}>
                   <View style={[s.pillIcon, { backgroundColor: taken ? Colors.successLight : Colors.primaryLight }]}>
                     <Text style={{ fontSize: 26 }}>{taken ? "✅" : "💊"}</Text>

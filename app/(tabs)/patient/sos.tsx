@@ -190,6 +190,7 @@ const s = StyleSheet.create({
   histDate:    { fontSize: 12, fontWeight: "700", color: Colors.text },
   histMsg:     { fontSize: 13, color: Colors.textMuted, marginTop: 3 },
   histLocation:{ fontSize: 12, color: Colors.primary, marginTop: 4, fontWeight: "600" },
+  sosSub:      { fontSize: 13, color: Colors.textMuted, textAlign: "center", marginTop: 8 },
   overlay:     { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", alignItems: "center", justifyContent: "center", padding: Spacing.lg },
   confirmCard: { width: "100%", alignItems: "center", gap: 8 },
   confirmEmoji:{ fontSize: 48 },

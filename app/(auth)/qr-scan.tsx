@@ -55,7 +55,7 @@ export default function QRScan() {
   return (
     <View style={s.container}>
       <CameraView
-        style={StyleSheet.absoluteFillObject}
+        style={StyleSheet.absoluteFill}
         facing="back"
         onBarcodeScanned={scanned ? undefined : handleScan}
         barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
@@ -100,7 +100,7 @@ const s = StyleSheet.create({
   permBtn:     { backgroundColor: Colors.primary, paddingHorizontal: 28, paddingVertical: 14, borderRadius: 12, marginTop: 8 },
   permBtnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
 
-  overlay:     { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "space-between" },
+  overlay:     { ...StyleSheet.absoluteFill, alignItems: "center", justifyContent: "space-between" },
   topBar:      { width: "100%", paddingHorizontal: 20, paddingTop: 8 },
   closeBtn:    { alignSelf: "flex-start", backgroundColor: "rgba(0,0,0,0.5)", paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
   closeText:   { color: "#fff", fontWeight: "700", fontSize: 14 },

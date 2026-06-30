@@ -82,7 +82,7 @@ export default function FamilyHome() {
         </View>
 
         {/* Patient card */}
-        <Card style={[s.patCard, { borderTopColor: Colors.family, borderTopWidth: 4 }]}>
+          <Card style={{ ...s.patCard, borderTopColor: Colors.family, borderTopWidth: 4 }}>
           <Row style={{ gap: 14 }}>
             <View style={s.patAvatar}><Text style={{ fontSize: 32 }}>🧑‍🦽</Text></View>
             <View style={{ flex: 1 }}>

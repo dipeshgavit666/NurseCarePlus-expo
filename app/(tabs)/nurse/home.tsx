@@ -82,9 +82,7 @@ export default function NurseHome() {
 
 function StatCard({ emoji, count, label, color }: { emoji: string; count: number; label: string; color: string }) {
   return (
-    <Card style={[s.statCard, { borderTopColor: color, borderTopWidth: 3 }]}>
-      <Text style={s.statEmoji}>{emoji}</Text>
-      <Text style={[s.statCount, { color }]}>{count}</Text>
+    <Card style={{ ...s.statCard, borderTopColor: color, borderTopWidth: 3 }}>
       <Text style={s.statLabel}>{label}</Text>
     </Card>
   );
