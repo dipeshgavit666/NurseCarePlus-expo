@@ -14,7 +14,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.nursecare.plus",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "NurseCare+ uses your location to share with caregivers during an SOS emergency."
+        "NSLocationWhenInUseUsageDescription": "NurseCare+ uses your location to share with caregivers during an SOS emergency.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
