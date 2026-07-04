@@ -6,46 +6,57 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { patientApi, appointmentApi, Appointment } from "../../../src/api";
 import { useAuth } from "../../../src/context/AuthContext";
+import { useRoleGuard } from "../../../src/hooks/useRoleGuard";
 import { Card, Row, SectionHeader, EmptyState, LoadingScreen, Button, Input, Badge } from "../../../src/components/common/UI";
 import { Colors, Spacing, Radius } from "../../../src/theme";
 
-const TYPE_META: Record<string, { emoji: string; color: string }> = {
-  followup: { emoji: "🩺", color: Colors.primary },
-  lab:      { emoji: "🧪", color: Colors.warning },
-  hospital: { emoji: "🏥", color: Colors.danger },
-};
+const TYPES: { key: Appointment["type"]; label: string; emoji: string; color: string }[] = [
+  { key: "follow_up", label: "Follow-up", emoji: "🩺", color: Colors.primary },
+  { key: "lab_test", label: "Lab Test", emoji: "🧪", color: Colors.warning },
+  { key: "hospital_visit", label: "Hospital Visit", emoji: "🏥", color: Colors.danger },
+];
 
 export default function Appointments() {
+  const guard = useRoleGuard(["patient", "nurse"]);
   const { user } = useAuth();
-  const [loading, setLoading]       = useState(true);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [appointments, setAppts]    = useState<Appointment[]>([]);
-  const [patientId, setPatientId]   = useState<string | null>(null);
-  const [showModal, setShowModal]   = useState(false);
-  const [saving, setSaving]         = useState(false);
-  const [form, setForm] = useState({ title: "", doctorName: "", location: "", dateTime: "", notes: "" });
+  const [appointments, setAppts] = useState<Appointment[]>([]);
+  const [patientId, setPatientId] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [type, setType] = useState<Appointment["type"]>("follow_up");
+  const [form, setForm] = useState({ title: "", doctorName: "", facilityName: "", address: "", dateTime: "", notes: "" });
 
   const set = (k: keyof typeof form) => (v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const init = async () => {
     try {
+      // Nurse landing here has no "own" patient — for now this screen assumes
+      // a patient context; nurses reach it from a patient's profile in a
+      // future iteration. Patient flow works end-to-end.
       const { patient } = await patientApi.getMe();
       setPatientId(patient._id);
       const { appointments: list } = await appointmentApi.getAll(patient._id);
       setAppts(list.sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()));
-    } catch (e: any) { Alert.alert("Error", e.message); }
-    finally { setLoading(false); setRefreshing(false); }
+    } catch (e: any) {
+      if (user?.role !== "nurse") Alert.alert("Error", e.message);
+    } finally { setLoading(false); setRefreshing(false); }
   };
 
-  useEffect(() => { init(); }, []);
+  useEffect(() => { if (!guard) init(); }, [guard]);
+  if (guard) return guard;
+  if (loading) return <LoadingScreen label="Loading appointments…" />;
 
   const createAppt = async () => {
-    if (!form.title || !form.dateTime) { Alert.alert("Required", "Title and date/time are required."); return; }
+    if (!form.title || !form.facilityName || !form.address || !form.dateTime) {
+      Alert.alert("Required", "Title, facility, address and date/time are required."); return;
+    }
     try {
       setSaving(true);
-      await appointmentApi.create({ ...form, patientId: patientId!, completed: false });
+      await appointmentApi.create({ ...form, type, patientId: patientId!, dateTime: form.dateTime as any, completed: false });
       setShowModal(false);
-      setForm({ title: "", doctorName: "", location: "", dateTime: "", notes: "" });
+      setForm({ title: "", doctorName: "", facilityName: "", address: "", dateTime: "", notes: "" });
       init();
     } catch (e: any) { Alert.alert("Error", e.message); }
     finally { setSaving(false); }
@@ -56,17 +67,15 @@ export default function Appointments() {
     catch (e: any) { Alert.alert("Error", e.message); }
   };
 
-  if (loading) return <LoadingScreen label="Loading appointments…" />;
-
   const now = new Date();
   const upcoming = appointments.filter(a => !a.completed && new Date(a.dateTime) >= now);
-  const past     = appointments.filter(a => a.completed || new Date(a.dateTime) < now);
+  const past = appointments.filter(a => a.completed || new Date(a.dateTime) < now);
 
   return (
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
         <Text style={s.title}>Follow-Up Calendar</Text>
-        {user?.role === "nurse" && (
+        {patientId && (
           <Button title="+ New" onPress={() => setShowModal(true)} size="sm" color={Colors.warning} />
         )}
       </View>
@@ -97,10 +106,19 @@ export default function Appointments() {
               <TouchableOpacity onPress={() => setShowModal(false)}><Text style={s.closeBtn}>✕</Text></TouchableOpacity>
             </View>
             <ScrollView contentContainerStyle={s.modalBody} keyboardShouldPersistTaps="handled">
+              <Text style={s.label}>Type</Text>
+              <Row style={{ gap: 8, marginBottom: Spacing.md, flexWrap: "wrap" }}>
+                {TYPES.map(t => (
+                  <TouchableOpacity key={t.key} style={[s.typeChip, type === t.key && { backgroundColor: t.color, borderColor: t.color }]} onPress={() => setType(t.key)}>
+                    <Text style={[s.typeChipText, type === t.key && { color: "#fff" }]}>{t.emoji} {t.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </Row>
               <Input label="Title *" placeholder="e.g. Cardiology Follow-up" value={form.title} onChangeText={set("title")} />
-              <Input label="Doctor / Lab Name" placeholder="e.g. Dr. Mehta" value={form.doctorName} onChangeText={set("doctorName")} />
-              <Input label="Location" placeholder="e.g. City Hospital, Room 4" value={form.location} onChangeText={set("location")} />
-              <Input label="Date & Time *" placeholder="YYYY-MM-DDTHH:MM" value={form.dateTime} onChangeText={set("dateTime")} />
+              <Input label="Doctor Name" placeholder="e.g. Dr. Mehta" value={form.doctorName} onChangeText={set("doctorName")} />
+              <Input label="Facility / Lab Name *" placeholder="e.g. City Hospital" value={form.facilityName} onChangeText={set("facilityName")} />
+              <Input label="Address *" placeholder="e.g. 12 MG Road, room 4" value={form.address} onChangeText={set("address")} />
+              <Input label="Date & Time * (ISO)" placeholder="YYYY-MM-DDTHH:MM" value={form.dateTime} onChangeText={set("dateTime")} />
               <Input label="Notes" placeholder="Bring previous reports…" value={form.notes} onChangeText={set("notes")} multiline numberOfLines={3} style={{ height: 80, textAlignVertical: "top" } as any} />
               <Button title="Create Appointment" onPress={createAppt} loading={saving} color={Colors.warning} />
             </ScrollView>
@@ -115,6 +133,7 @@ function ApptCard({ appt, faded, canComplete, onComplete }: { appt: Appointment;
   const date = new Date(appt.dateTime);
   const isToday = date.toDateString() === new Date().toDateString();
   const isTomorrow = date.toDateString() === new Date(Date.now() + 86400000).toDateString();
+  const meta = TYPES.find(t => t.key === appt.type);
 
   return (
     <Card style={faded ? { ...s.apptCard, opacity: 0.6 } : s.apptCard}>
@@ -124,9 +143,9 @@ function ApptCard({ appt, faded, canComplete, onComplete }: { appt: Appointment;
           <Text style={s.dateMonth}>{date.toLocaleDateString("en-IN", { month: "short" })}</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={s.apptTitle}>{appt.title}</Text>
+          <Text style={s.apptTitle}>{meta?.emoji} {appt.title}</Text>
           {appt.doctorName && <Text style={s.apptMeta}>👨‍⚕️ {appt.doctorName}</Text>}
-          {appt.location && <Text style={s.apptMeta}>📍 {appt.location}</Text>}
+          <Text style={s.apptMeta}>📍 {appt.facilityName}</Text>
           <Text style={s.apptTime}>
             🕐 {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             {isToday && <Text style={{ color: Colors.danger }}>  · Today</Text>}
@@ -143,20 +162,23 @@ function ApptCard({ appt, faded, canComplete, onComplete }: { appt: Appointment;
 }
 
 const s = StyleSheet.create({
-  safe:        { flex: 1, backgroundColor: Colors.bg },
-  header:      { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: Spacing.lg, paddingBottom: Spacing.sm },
-  title:       { fontSize: 24, fontWeight: "900", color: Colors.text },
-  scroll:      { padding: Spacing.md, gap: 10, paddingBottom: 40 },
-  apptCard:    { },
-  dateBox:     { width: 52, height: 52, borderRadius: Radius.md, backgroundColor: Colors.warningLight, alignItems: "center", justifyContent: "center" },
-  dateDay:     { fontSize: 18, fontWeight: "900", color: Colors.warning },
-  dateMonth:   { fontSize: 10, fontWeight: "700", color: Colors.warning, textTransform: "uppercase" },
-  apptTitle:   { fontSize: 15, fontWeight: "800", color: Colors.text },
-  apptMeta:    { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
-  apptTime:    { fontSize: 12, color: Colors.primary, marginTop: 4, fontWeight: "600" },
-  modal:       { flex: 1, backgroundColor: Colors.bg },
+  safe: { flex: 1, backgroundColor: Colors.bg },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: Spacing.lg, paddingBottom: Spacing.sm },
+  title: { fontSize: 24, fontWeight: "900", color: Colors.text },
+  scroll: { padding: Spacing.md, gap: 10, paddingBottom: 40 },
+  apptCard: {},
+  dateBox: { width: 52, height: 52, borderRadius: Radius.md, backgroundColor: Colors.warningLight, alignItems: "center", justifyContent: "center" },
+  dateDay: { fontSize: 18, fontWeight: "900", color: Colors.warning },
+  dateMonth: { fontSize: 10, fontWeight: "700", color: Colors.warning, textTransform: "uppercase" },
+  apptTitle: { fontSize: 15, fontWeight: "800", color: Colors.text },
+  apptMeta: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  apptTime: { fontSize: 12, color: Colors.primary, marginTop: 4, fontWeight: "600" },
+  modal: { flex: 1, backgroundColor: Colors.bg },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: Spacing.lg, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  modalTitle:  { fontSize: 20, fontWeight: "900", color: Colors.text },
-  closeBtn:    { fontSize: 20, color: Colors.textMuted, padding: 4 },
-  modalBody:   { padding: Spacing.lg, gap: 4, paddingBottom: 40 },
+  modalTitle: { fontSize: 20, fontWeight: "900", color: Colors.text },
+  closeBtn: { fontSize: 20, color: Colors.textMuted, padding: 4 },
+  modalBody: { padding: Spacing.lg, gap: 4, paddingBottom: 40 },
+  label: { fontSize: 13, fontWeight: "600", color: Colors.text, marginBottom: 6 },
+  typeChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: Radius.full, borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.card },
+  typeChipText: { fontSize: 12, fontWeight: "700", color: Colors.textSecondary },
 });

@@ -1,14 +1,5 @@
-export interface DietItem {
-  name: string;
-  emoji: string;
-}
-
-export interface DietPlan {
-  condition: string;
-  eat: DietItem[];
-  avoid: DietItem[];
-  tips: string[];
-}
+export interface DietItem { name: string; emoji: string; }
+export interface DietPlan { condition: string; eat: DietItem[]; avoid: DietItem[]; tips: string[]; }
 
 const DIET_PLANS: Record<string, DietPlan> = {
   diabetes: {
@@ -57,7 +48,7 @@ const DIET_PLANS: Record<string, DietPlan> = {
       "Cook at home more often",
     ],
   },
-  heart: {
+  heart_disease: {
     condition: "Heart Disease",
     eat: [
       { emoji: "🐟", name: "Omega-3 rich fish" },
@@ -71,7 +62,6 @@ const DIET_PLANS: Record<string, DietPlan> = {
       { emoji: "🍔", name: "Red & processed meat" },
       { emoji: "🍩", name: "Trans fats & fried foods" },
       { emoji: "🧂", name: "Excess salt" },
-      { emoji: "🚬", name: "Smoking & alcohol" },
     ],
     tips: [
       "Stay physically active as advised by your doctor",
@@ -79,7 +69,7 @@ const DIET_PLANS: Record<string, DietPlan> = {
       "Manage stress with relaxation techniques",
     ],
   },
-  general: {
+  other: {
     condition: "General Recovery",
     eat: [
       { emoji: "🍎", name: "Fresh fruits & vegetables" },
@@ -102,14 +92,17 @@ const DIET_PLANS: Record<string, DietPlan> = {
   },
 };
 
-/** Pick the best matching diet plan based on a free-text diagnosis string. */
+// Patient.diagnosis on the backend is a strict enum:
+// "hypertension" | "diabetes" | "heart_disease" | "other" — match directly,
+// with a fuzzy fallback for any free-text diagnosisDetails.
 export function getDietPlanForDiagnosis(diagnosis?: string): DietPlan {
-  if (!diagnosis) return DIET_PLANS.general;
+  if (!diagnosis) return DIET_PLANS.other;
+  if (DIET_PLANS[diagnosis]) return DIET_PLANS[diagnosis];
   const d = diagnosis.toLowerCase();
   if (d.includes("diabet")) return DIET_PLANS.diabetes;
   if (d.includes("hypertens") || d.includes("blood pressure") || d.includes("bp")) return DIET_PLANS.hypertension;
-  if (d.includes("heart") || d.includes("cardiac") || d.includes("cardio")) return DIET_PLANS.heart;
-  return DIET_PLANS.general;
+  if (d.includes("heart") || d.includes("cardiac") || d.includes("cardio")) return DIET_PLANS.heart_disease;
+  return DIET_PLANS.other;
 }
 
 export function getAllDietPlans(): DietPlan[] {

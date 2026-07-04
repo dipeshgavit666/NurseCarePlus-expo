@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import { medicationApi, Medication, MedicationLog } from "../api";
 import { scheduleMedicationAlarms } from "../services/notifications";
 
@@ -7,29 +7,26 @@ interface MedCtx {
   history: MedicationLog[];
   loading: boolean;
   loadMeds: (patientId: string) => Promise<void>;
-  markTaken: (medicationId: string) => Promise<void>;
-  isTakenToday: (medicationId: string) => boolean;
+  markTaken: (medicationId: string, scheduledTime: string) => Promise<void>;
+  isTakenToday: (medicationId: string, scheduledTime?: string) => boolean;
 }
 
 const MedContext = createContext<MedCtx>({} as MedCtx);
 
 export function MedProvider({ children }: { children: React.ReactNode }) {
   const [medications, setMedications] = useState<Medication[]>([]);
-  const [history, setHistory]         = useState<MedicationLog[]>([]);
-  const [loading, setLoading]         = useState(false);
-  const [patientId, setPatientId]     = useState<string | null>(null);
+  const [history, setHistory] = useState<MedicationLog[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const loadMeds = useCallback(async (pid: string) => {
     setLoading(true);
-    setPatientId(pid);
     try {
-      const [{ medications: list }, { history: logs }] = await Promise.all([
+      const [{ medications: list }, { logs }] = await Promise.all([
         medicationApi.getForPatient(pid),
         medicationApi.getHistory(pid),
       ]);
       setMedications(list);
       setHistory(logs);
-      // Schedule local alarms for all medications
       await scheduleMedicationAlarms(list);
     } catch (e) {
       console.warn("loadMeds error", e);
@@ -38,17 +35,21 @@ export function MedProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const markTaken = useCallback(async (medicationId: string) => {
-    const { log } = await medicationApi.markTaken(medicationId);
+  // Backend requires `scheduledTime` (HH:MM) to know which schedule slot was
+  // marked — the previous frontend never sent it, which crashes the
+  // markAsTaken controller (`scheduledTime.split` on undefined).
+  const markTaken = useCallback(async (medicationId: string, scheduledTime: string) => {
+    const { log } = await medicationApi.markTaken(medicationId, scheduledTime);
     setHistory(h => [log, ...h]);
   }, []);
 
-  const isTakenToday = useCallback((medicationId: string): boolean => {
+  const isTakenToday = useCallback((medicationId: string, scheduledTime?: string): boolean => {
     const today = new Date().toDateString();
     return history.some(
       l => l.medicationId === medicationId &&
            l.status === "taken" &&
-           new Date(l.takenAt).toDateString() === today
+           (!scheduledTime || l.scheduledTime === scheduledTime) &&
+           l.takenAt && new Date(l.takenAt).toDateString() === today
     );
   }, [history]);
 

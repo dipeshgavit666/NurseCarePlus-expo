@@ -1,8 +1,6 @@
 import * as Notifications from "expo-notifications";
-import { Platform } from "react-native";
 import { Medication } from "../api";
 
-// Configure how notifications appear when app is in foreground
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -20,24 +18,18 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return status === "granted";
 }
 
-/**
- * Schedule daily local alarms for all medication times.
- * Returns a map of { medicationId_time -> notificationId }
- */
 export async function scheduleMedicationAlarms(
   medications: Medication[]
 ): Promise<Record<string, string>> {
   const granted = await requestNotificationPermission();
   if (!granted) return {};
 
-  // Cancel all previous med notifications first
   await cancelAllMedicationAlarms();
-
   const scheduled: Record<string, string> = {};
 
   for (const med of medications) {
-    for (const timeStr of med.times ?? []) {
-      const [hourStr, minStr] = timeStr.split(":");
+    for (const slot of med.schedule ?? []) {
+      const [hourStr, minStr] = slot.time.split(":");
       const hour = parseInt(hourStr, 10);
       const minute = parseInt(minStr ?? "0", 10);
       if (isNaN(hour) || isNaN(minute)) continue;
@@ -46,8 +38,8 @@ export async function scheduleMedicationAlarms(
         const id = await Notifications.scheduleNotificationAsync({
           content: {
             title: "💊 Medication Reminder",
-            body: `Time to take ${med.name} ${med.dosage}`,
-            data: { medicationId: med._id, medName: med.name, time: timeStr },
+            body: `Time to take ${med.name} ${med.dose}${med.unit}`,
+            data: { medicationId: med._id, medName: med.name, time: slot.time },
             sound: true,
           },
           trigger: {
@@ -56,13 +48,12 @@ export async function scheduleMedicationAlarms(
             minute,
           },
         });
-        scheduled[`${med._id}_${timeStr}`] = id;
+        scheduled[`${med._id}_${slot.time}`] = id;
       } catch (err) {
-        console.warn("Failed to schedule alarm for", med.name, timeStr, err);
+        console.warn("Failed to schedule alarm for", med.name, slot.time, err);
       }
     }
   }
-
   return scheduled;
 }
 
@@ -70,18 +61,15 @@ export async function cancelAllMedicationAlarms(): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
-/**
- * Fire a one-time "missed dose" notification (called 30min after due time if not marked taken).
- */
-export async function sendMissedDoseAlert(medName: string, familyNames: string[] = []): Promise<void> {
+export async function sendMissedDoseAlert(medName: string): Promise<void> {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "⚠️ Missed Medication",
-      body: `${medName} was not taken. ${familyNames.length ? `Notifying: ${familyNames.join(", ")}` : ""}`,
+      body: `${medName} was not taken.`,
       data: { type: "missed_dose" },
       sound: true,
     },
-    trigger: null, // immediate
+    trigger: null,
   });
 }
 

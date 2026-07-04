@@ -15,7 +15,7 @@ interface AuthCtx {
 const AuthContext = createContext<AuthCtx>({} as AuthCtx);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser]       = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,6 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch {
         await AsyncStorage.removeItem("token");
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -36,6 +37,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (token: string, u: User) => {
     await AsyncStorage.setItem("token", token);
+    // Set user LAST and synchronously with token save so any screen reading
+    // `user` right after login already has the correct role — this avoids
+    // the brief "user is undefined -> guards don't apply" window that made
+    // role-based tabs look like they weren't working.
     setUser(u);
   }, []);
 

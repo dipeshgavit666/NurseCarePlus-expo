@@ -2,11 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const BASE_URL =
   (process.env.EXPO_PUBLIC_API_URL as string) ||
-  "https://nursecareplus-api.onrender.com";
+  "https://nursecareplus-api.onrender.com/api";
 
-async function getHeaders(
-  isMultipart = false,
-): Promise<Record<string, string>> {
+async function getHeaders(isMultipart = false): Promise<Record<string, string>> {
   const token = await AsyncStorage.getItem("token");
   const headers: Record<string, string> = {};
   if (!isMultipart) headers["Content-Type"] = "application/json";
@@ -24,7 +22,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const text = await res.text();
   let data: any;
   try {
-    data = JSON.parse(text);
+    data = text ? JSON.parse(text) : {};
   } catch {
     data = { message: text };
   }
@@ -37,9 +35,6 @@ export const http = {
   post: <T>(path: string, body: unknown) =>
     request<T>(path, { method: "POST", body: JSON.stringify(body) }),
   patch: <T>(path: string, body?: unknown) =>
-    request<T>(path, {
-      method: "PATCH",
-      body: body ? JSON.stringify(body) : undefined,
-    }),
+    request<T>(path, { method: "PATCH", body: body ? JSON.stringify(body) : undefined }),
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
 };

@@ -18,10 +18,14 @@ export default function TabsLayout() {
     user.role === "family" ? Colors.family :
     Colors.patient;
 
-  const isNurse  = user.role === "nurse";
+  const isNurse = user.role === "nurse";
   const isFamily = user.role === "family";
   const isPatient = user.role === "patient";
 
+  // `href: null` hides a screen from the tab BAR only — it does not stop the
+  // route from being opened. The real access control lives inside each
+  // screen via useRoleGuard(), which redirects unauthorized roles home.
+  // This layout just keeps the bar itself clean per role.
   return (
     <Tabs
       screenOptions={{
@@ -39,19 +43,17 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="home" options={{ title: "Home", tabBarIcon: ({ focused }) => <Icon e="🏠" focused={focused} /> }} />
 
-      {/* Nurse-only */}
       <Tabs.Screen name="nurse/patients" options={{ title: "Patients", tabBarIcon: ({ focused }) => <Icon e="🧑‍🦽" focused={focused} />, href: isNurse ? undefined : null }} />
       <Tabs.Screen name="nurse/create-patient" options={{ title: "New", tabBarIcon: ({ focused }) => <Icon e="➕" focused={focused} />, href: isNurse ? undefined : null }} />
 
-      {/* Patient-only (nurse sees appointments too, but not meds/health/sos personal) */}
       <Tabs.Screen name="patient/medications" options={{ title: "Meds", tabBarIcon: ({ focused }) => <Icon e="💊" focused={focused} />, href: isPatient ? undefined : null }} />
-      <Tabs.Screen name="patient/health"      options={{ title: "Health", tabBarIcon: ({ focused }) => <Icon e="❤️" focused={focused} />, href: isPatient ? undefined : null }} />
-      <Tabs.Screen name="patient/diet"        options={{ title: "Diet", tabBarIcon: ({ focused }) => <Icon e="🥗" focused={focused} />, href: isPatient ? undefined : null }} />
+      <Tabs.Screen name="patient/health" options={{ title: "Health", tabBarIcon: ({ focused }) => <Icon e="❤️" focused={focused} />, href: isPatient ? undefined : null }} />
+      <Tabs.Screen name="patient/diet" options={{ title: "Diet", tabBarIcon: ({ focused }) => <Icon e="🥗" focused={focused} />, href: isPatient ? undefined : null }} />
       <Tabs.Screen name="patient/appointments" options={{ title: "Calendar", tabBarIcon: ({ focused }) => <Icon e="📅" focused={focused} />, href: (isPatient || isNurse) ? undefined : null }} />
-      <Tabs.Screen name="patient/sos"         options={{ title: "SOS", tabBarIcon: ({ focused }) => <Icon e="🆘" focused={focused} />, href: isPatient ? undefined : null }} />
+      <Tabs.Screen name="patient/sos" options={{ title: "SOS", tabBarIcon: ({ focused }) => <Icon e="🆘" focused={focused} />, href: isPatient ? undefined : null }} />
 
-      {/* Family */}
       <Tabs.Screen name="family/dashboard" options={{ title: "Dashboard", tabBarIcon: ({ focused }) => <Icon e="👨‍👩‍👧" focused={focused} />, href: isFamily ? undefined : null }} />
+      <Tabs.Screen name="family/home" options={{ href: null }} />
 
       <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ focused }) => <Icon e="👤" focused={focused} /> }} />
     </Tabs>
