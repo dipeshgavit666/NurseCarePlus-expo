@@ -24,6 +24,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const activeRole = ROLES.find(r => r.key === role)!;
+  const isPatient = role === "patient";
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
@@ -69,33 +70,40 @@ export default function Login() {
           </View>
 
           <Card style={s.form}>
-            <Text style={s.formTitle}>Welcome back</Text>
-            <Text style={s.formSub}>Sign in as {activeRole.label}</Text>
-
-            <Input label="Email" placeholder="you@example.com" value={email} onChangeText={setEmail}
-              keyboardType="email-address" autoCapitalize="none" icon="✉️" />
-            <Input label="Password" placeholder="••••••••" value={password} onChangeText={setPassword}
-              secureTextEntry icon="🔒" />
-
-            <Button title="Sign In" onPress={handleLogin} loading={loading} color={activeRole.color} style={{ marginTop: 4 }} />
-
-            {role === "patient" && (
+            {isPatient ? (
               <>
-                <View style={s.or}>
-                  <View style={s.orLine} /><Text style={s.orText}>or</Text><View style={s.orLine} />
-                </View>
-                <Button title="Scan QR Code" onPress={() => router.push("/(auth)/qr-scan")}
-                  variant="outline" color={Colors.patient} icon="📷" />
+                <Text style={s.formTitle}>Patient sign-in</Text>
+                <Text style={s.formSub}>Patients only sign in by scanning the QR code your nurse gave you at discharge.</Text>
+                <Button
+                  title="📷  Scan QR Code"
+                  onPress={() => router.push("/(auth)/qr-scan")}
+                  color={Colors.patient}
+                  size="lg"
+                  style={{ marginTop: 8 }}
+                />
+                <Text style={s.noteSmall}>Lost your QR code? Ask your nurse to resend it — patients can't sign in with email/password.</Text>
+              </>
+            ) : (
+              <>
+                <Text style={s.formTitle}>Welcome back</Text>
+                <Text style={s.formSub}>Sign in as {activeRole.label}</Text>
+                <Input label="Email" placeholder="you@example.com" value={email} onChangeText={setEmail}
+                  keyboardType="email-address" autoCapitalize="none" icon="✉️" />
+                <Input label="Password" placeholder="••••••••" value={password} onChangeText={setPassword}
+                  secureTextEntry icon="🔒" />
+                <Button title="Sign In" onPress={handleLogin} loading={loading} color={activeRole.color} style={{ marginTop: 4 }} />
               </>
             )}
           </Card>
 
-          <TouchableOpacity style={s.register} onPress={() => router.push("/(auth)/register")}>
-            <Text style={s.registerText}>
-              No account?{"  "}
-              <Text style={{ color: activeRole.color, fontWeight: "700" }}>Create one →</Text>
-            </Text>
-          </TouchableOpacity>
+          {!isPatient && (
+            <TouchableOpacity style={s.register} onPress={() => router.push("/(auth)/register")}>
+              <Text style={s.registerText}>
+                No account?{"  "}
+                <Text style={{ color: activeRole.color, fontWeight: "700" }}>Create one →</Text>
+              </Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -122,4 +130,5 @@ const s = StyleSheet.create({
   orText: { color: Colors.textMuted, fontSize: 13 },
   register: { alignItems: "center", marginTop: Spacing.lg },
   registerText: { fontSize: 14, color: Colors.textMuted },
+  noteSmall: { fontSize: 11, color: Colors.textMuted, textAlign: "center", marginTop: 10 }
 });

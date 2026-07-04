@@ -7,6 +7,7 @@ import { useMeds } from "../../../src/context/MedContext";
 import { useRoleGuard } from "../../../src/hooks/useRoleGuard";
 import { Card, Row, SectionHeader, LoadingScreen, EmptyState, Button, Badge } from "../../../src/components/common/UI";
 import { Colors, Spacing, Radius } from "../../../src/theme";
+import { Input } from "../../../src/components/common/UI";
 
 export default function FamilyHome() {
   const guard = useRoleGuard(["family"]);
@@ -17,6 +18,8 @@ export default function FamilyHome() {
   const [appointments, setAppts] = useState<Appointment[]>([]);
   const [todayLog, setTodayLog] = useState<HealthLog | null>(null);
   const [sosLoading, setSosLoading] = useState(false);
+  const [inviteCode, setInviteCode] = useState(""); 
+  const [linking, setLinking] = useState(false);
 
   const load = async () => {
     try {
@@ -41,7 +44,24 @@ export default function FamilyHome() {
         <View style={s.noLink}>
           <Text style={s.noLinkEmoji}>🔗</Text>
           <Text style={s.noLinkTitle}>No Patient Linked</Text>
-          <Text style={s.noLinkSub}>Ask the nurse for the invite code to link your account to a patient.</Text>
+          <Text style={s.noLinkSub}>Enter the invite code the nurse or patient shared with you.</Text>
+          <Card style={{ width: "100%", marginTop: Spacing.md }}>
+            <Input label="Invite Code" placeholder="e.g. NRS7K2" value={inviteCode} onChangeText={t => setInviteCode(t.toUpperCase())} autoCapitalize="characters" maxLength={6} />
+            <Button
+              title="Link"
+              color={Colors.family}
+              loading={linking}
+              onPress={async () => {
+                if (!inviteCode.trim()) return;
+                try {
+                  setLinking(true);
+                  await patientApi.linkFamily({ inviteCode: inviteCode.trim() });
+                  load();
+                } catch (e: any) { Alert.alert("Error", e.message); }
+                finally { setLinking(false); }
+              }}
+            />
+          </Card>
         </View>
       </SafeAreaView>
     );

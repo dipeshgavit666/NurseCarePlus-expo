@@ -12,7 +12,6 @@ import { Colors, Spacing, Radius } from "../../src/theme";
 
 const ROLES: { key: Role; label: string; emoji: string; color: string; desc: string }[] = [
   { key: "nurse",   label: "Nurse / Admin", emoji: "👩‍⚕️", color: Colors.nurse,   desc: "Create & manage patient profiles" },
-  { key: "patient", label: "Patient",       emoji: "🧑‍🦽", color: Colors.patient, desc: "View care plan & log health" },
   { key: "family",  label: "Family",        emoji: "👨‍👩‍👧", color: Colors.family,  desc: "Monitor & receive alerts" },
 ];
 
@@ -39,7 +38,7 @@ export default function Register() {
       setLoading(true);
       const { token, user } = await authApi.register({ name: name.trim(), email: email.trim(), password, role });
       await login(token, user);
-      router.replace("/(tabs)/home");
+      router.replace((role === "family" ? "(auth)/link-patient" : "(tabs)/home") as any);
     } catch (e: any) {
       Alert.alert("Registration Failed", e.message);
     } finally {
