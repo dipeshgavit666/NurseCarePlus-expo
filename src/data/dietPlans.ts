@@ -1,5 +1,13 @@
-export interface DietItem { name: string; emoji: string; }
-export interface DietPlan { condition: string; eat: DietItem[]; avoid: DietItem[]; tips: string[]; }
+export interface DietItem {
+  name: string;
+  emoji: string;
+}
+export interface DietPlan {
+  condition: string;
+  eat: DietItem[];
+  avoid: DietItem[];
+  tips: string[];
+}
 
 const DIET_PLANS: Record<string, DietPlan> = {
   diabetes: {
@@ -100,11 +108,41 @@ export function getDietPlanForDiagnosis(diagnosis?: string): DietPlan {
   if (DIET_PLANS[diagnosis]) return DIET_PLANS[diagnosis];
   const d = diagnosis.toLowerCase();
   if (d.includes("diabet")) return DIET_PLANS.diabetes;
-  if (d.includes("hypertens") || d.includes("blood pressure") || d.includes("bp")) return DIET_PLANS.hypertension;
-  if (d.includes("heart") || d.includes("cardiac") || d.includes("cardio")) return DIET_PLANS.heart_disease;
+  if (
+    d.includes("hypertens") ||
+    d.includes("blood pressure") ||
+    d.includes("bp")
+  )
+    return DIET_PLANS.hypertension;
+  if (d.includes("heart") || d.includes("cardiac") || d.includes("cardio"))
+    return DIET_PLANS.heart_disease;
   return DIET_PLANS.other;
 }
 
 export function getAllDietPlans(): DietPlan[] {
   return Object.values(DIET_PLANS);
+}
+
+// Merges a nurse's custom diet items on top of the diagnosis-based defaults.
+// Custom items are ADDED to the default list (not a full replace), so the
+// baseline guidance for the diagnosis is never lost.
+export function getEffectiveDietPlan(
+  diagnosis: string | undefined,
+  customDiet?: { eat: string[]; avoid: string[] },
+): DietPlan {
+  const base = getDietPlanForDiagnosis(diagnosis);
+  if (!customDiet || (!customDiet.eat?.length && !customDiet.avoid?.length))
+    return base;
+
+  return {
+    ...base,
+    eat: [
+      ...base.eat,
+      ...(customDiet.eat ?? []).map((name) => ({ emoji: "⭐", name })),
+    ],
+    avoid: [
+      ...base.avoid,
+      ...(customDiet.avoid ?? []).map((name) => ({ emoji: "🚫", name })),
+    ],
+  };
 }

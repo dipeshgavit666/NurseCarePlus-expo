@@ -88,7 +88,7 @@ function QuickAction({ emoji, label, color, onPress }: { emoji: string; label: s
 
 function PatientRow({ patient }: { patient: Patient }) {
   return (
-    <Card style={s.patRow} onPress={() => router.push({ pathname: "/(tabs)/nurse/patients" })}>
+    <Card style={s.patRow} onPress={() => router.push({ pathname: "/(tabs)/nurse/patient-detail", params: { patientId: patient._id } })}>
       <Row style={{ gap: 12 }}>
         <Avatar emoji="🧑‍🦽" size={44} color={Colors.nurseLight} />
         <View style={{ flex: 1 }}>

@@ -19,10 +19,12 @@ export interface Patient {
   diagnosisDetails?: string;
   age?: number;
   dob?: string;
+  healthStatus: string;
   medicalHistory?: string;
   linkedFamilyIds?: string[];
   qrCode?: string;
   inviteCode?: string;
+  customDiet?: { eat: string[]; avoid: string[] };
 }
 
 export interface Medication {
@@ -87,8 +89,13 @@ export interface SosEvent {
 // QR login because JSON.parse(undefined) throws server-side.
 
 export const authApi = {
-  register: (body: { name: string; email: string; password: string; role: Role; phone?: string }) =>
-    http.post<{ token: string; user: User }>("/auth/register", body),
+  register: (body: {
+    name: string;
+    email: string;
+    password: string;
+    role: Role;
+    phone?: string;
+  }) => http.post<{ token: string; user: User }>("/auth/register", body),
 
   login: (body: { email: string; password: string }) =>
     http.post<{ token: string; user: User }>("/auth/login", body),
@@ -110,18 +117,31 @@ export const patientApi = {
   getLinked: () => http.get<{ patient: Patient }>("/patients/linked"),
   linkFamily: (body: { inviteCode: string }) =>
     http.post<{ patient: Patient }>("/patients/link-family", body),
+  updateDiet: (patientId: string, body: { eat: string[]; avoid: string[] }) =>
+    http.patch<{ patient: Patient }>(`/patients/${patientId}/diet`, body),
+  updateHealthStatus: (patientId: string, healthStatus: string) =>
+    http.patch<{ patient: Patient }>(`/patients/${patientId}/health-status`, {
+      healthStatus,
+    }),
 };
 
 // ─── Medication API ────────────────────────────────────────────────────────
 
 export const medicationApi = {
-  create: (body: Partial<Medication>) => http.post<{ medication: Medication }>("/medications", body),
+  create: (body: Partial<Medication>) =>
+    http.post<{ medication: Medication }>("/medications", body),
   getForPatient: (patientId: string) =>
-    http.get<{ medications: Medication[] }>(`/medications/patient/${patientId}`),
+    http.get<{ medications: Medication[] }>(
+      `/medications/patient/${patientId}`,
+    ),
   markTaken: (medicationId: string, scheduledTime: string) =>
-    http.post<{ log: MedicationLog }>(`/medications/${medicationId}/taken`, { scheduledTime }),
+    http.post<{ log: MedicationLog }>(`/medications/${medicationId}/taken`, {
+      scheduledTime,
+    }),
   getHistory: (patientId: string, days = 7) =>
-    http.get<{ logs: MedicationLog[] }>(`/medications/patient/${patientId}/history?days=${days}`),
+    http.get<{ logs: MedicationLog[] }>(
+      `/medications/patient/${patientId}/history?days=${days}`,
+    ),
 };
 
 // ─── Health API ───────────────────────────────────────────────────────────
@@ -130,34 +150,50 @@ export const healthApi = {
   log: (body: Partial<HealthLog> & { patientId: string }) =>
     http.post<{ log: HealthLog; alerts: string[] }>("/health-logs", body),
   getForPatient: (patientId: string, days = 30) =>
-    http.get<{ logs: HealthLog[] }>(`/health-logs/patient/${patientId}?days=${days}`),
+    http.get<{ logs: HealthLog[] }>(
+      `/health-logs/patient/${patientId}?days=${days}`,
+    ),
   getToday: (patientId: string) =>
-    http.get<{ log: HealthLog | null }>(`/health-logs/patient/${patientId}/today`),
-  getSummary: (patientId: string) => http.get<any>(`/health-logs/patient/${patientId}/summary`),
+    http.get<{ log: HealthLog | null }>(
+      `/health-logs/patient/${patientId}/today`,
+    ),
+  getSummary: (patientId: string) =>
+    http.get<any>(`/health-logs/patient/${patientId}/summary`),
 };
 
 // ─── Appointment API ────────────────────────────────────────────────────────
 
 export const appointmentApi = {
-  create: (body: Partial<Appointment>) => http.post<{ appointment: Appointment }>("/appointments", body),
+  create: (body: Partial<Appointment>) =>
+    http.post<{ appointment: Appointment }>("/appointments", body),
   getUpcoming: (patientId: string) =>
-    http.get<{ appointments: Appointment[] }>(`/appointments/patient/${patientId}/upcoming`),
+    http.get<{ appointments: Appointment[] }>(
+      `/appointments/patient/${patientId}/upcoming`,
+    ),
   getAll: (patientId: string) =>
-    http.get<{ appointments: Appointment[] }>(`/appointments/patient/${patientId}`),
-  complete: (id: string) => http.patch<{ appointment: Appointment }>(`/appointments/${id}/complete`),
+    http.get<{ appointments: Appointment[] }>(
+      `/appointments/patient/${patientId}`,
+    ),
+  complete: (id: string) =>
+    http.patch<{ appointment: Appointment }>(`/appointments/${id}/complete`),
 };
 
 // ─── SOS API ────────────────────────────────────────────────────────────────
 
 export const sosApi = {
-  trigger: (body: { patientId: string; location?: { latitude: number; longitude: number } | null }) =>
-    http.post<{ event: SosEvent }>("/sos", body),
-  getHistory: (patientId: string) => http.get<{ events: SosEvent[] }>(`/sos/patient/${patientId}`),
-  resolve: (id: string) => http.patch<{ event: SosEvent }>(`/sos/${id}/resolve`),
+  trigger: (body: {
+    patientId: string;
+    location?: { latitude: number; longitude: number } | null;
+  }) => http.post<{ event: SosEvent }>("/sos", body),
+  getHistory: (patientId: string) =>
+    http.get<{ events: SosEvent[] }>(`/sos/patient/${patientId}`),
+  resolve: (id: string) =>
+    http.patch<{ event: SosEvent }>(`/sos/${id}/resolve`),
 };
 
 // ─── User API ───────────────────────────────────────────────────────────────
 
 export const userApi = {
-  savePushToken: (token: string) => http.post<{ success: boolean }>("/users/push-token", { token }),
+  savePushToken: (token: string) =>
+    http.post<{ success: boolean }>("/users/push-token", { token }),
 };

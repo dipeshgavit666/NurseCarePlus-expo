@@ -39,7 +39,7 @@ export default function Patients() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} />}
         ListEmptyComponent={<EmptyState emoji="🧑‍🦽" title="No patients yet" subtitle="Create your first patient profile" />}
         renderItem={({ item }) => (
-          <Card style={s.card}>
+          <Card style={s.card} onPress={() => router.push({ pathname: "/(tabs)/nurse/patient-detail", params: { patientId: item._id } })}>
             <Row style={{ gap: 12 }}>
               <Avatar emoji="🧑‍🦽" size={50} color={Colors.nurseLight} />
               <View style={{ flex: 1 }}>

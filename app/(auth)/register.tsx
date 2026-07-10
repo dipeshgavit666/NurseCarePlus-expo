@@ -38,7 +38,7 @@ export default function Register() {
       setLoading(true);
       const { token, user } = await authApi.register({ name: name.trim(), email: email.trim(), password, role });
       await login(token, user);
-      router.replace((role === "family" ? "(auth)/link-patient" : "(tabs)/home") as any);
+      router.replace((role === "family" ? "/(auth)/link-patient" : "/(tabs)/home") as any);
     } catch (e: any) {
       Alert.alert("Registration Failed", e.message);
     } finally {

@@ -45,6 +45,10 @@ export default function TabsLayout() {
 
       <Tabs.Screen name="nurse/patients" options={{ title: "Patients", tabBarIcon: ({ focused }) => <Icon e="🧑‍🦽" focused={focused} />, href: isNurse ? undefined : null }} />
       <Tabs.Screen name="nurse/create-patient" options={{ title: "New", tabBarIcon: ({ focused }) => <Icon e="➕" focused={focused} />, href: isNurse ? undefined : null }} />
+      <Tabs.Screen name="nurse/patient-detail" options={{ href: null }} />
+      <Tabs.Screen name="nurse/add-medication" options={{ href: null }} />
+      <Tabs.Screen name="nurse/add-appointment" options={{ href: null }} />
+      <Tabs.Screen name="nurse/edit-diet" options={{ href: null }} />
 
       <Tabs.Screen name="patient/medications" options={{ title: "Meds", tabBarIcon: ({ focused }) => <Icon e="💊" focused={focused} />, href: isPatient ? undefined : null }} />
       <Tabs.Screen name="patient/health" options={{ title: "Health", tabBarIcon: ({ focused }) => <Icon e="❤️" focused={focused} />, href: isPatient ? undefined : null }} />

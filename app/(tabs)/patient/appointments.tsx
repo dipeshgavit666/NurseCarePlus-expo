@@ -9,6 +9,8 @@ import { useAuth } from "../../../src/context/AuthContext";
 import { useRoleGuard } from "../../../src/hooks/useRoleGuard";
 import { Card, Row, SectionHeader, EmptyState, LoadingScreen, Button, Input, Badge } from "../../../src/components/common/UI";
 import { Colors, Spacing, Radius } from "../../../src/theme";
+import { DateTimeField } from "../../../src/components/common/DateTimeField";
+import { scheduleAppointmentReminders } from "../../../src/services/notifications";
 
 const TYPES: { key: Appointment["type"]; label: string; emoji: string; color: string }[] = [
   { key: "follow_up", label: "Follow-up", emoji: "🩺", color: Colors.primary },
@@ -27,6 +29,7 @@ export default function Appointments() {
   const [saving, setSaving] = useState(false);
   const [type, setType] = useState<Appointment["type"]>("follow_up");
   const [form, setForm] = useState({ title: "", doctorName: "", facilityName: "", address: "", dateTime: "", notes: "" });
+  const [dateTime, setDateTime] = useState(new Date());
 
   const set = (k: keyof typeof form) => (v: string) => setForm(f => ({ ...f, [k]: v }));
 
@@ -118,7 +121,7 @@ export default function Appointments() {
               <Input label="Doctor Name" placeholder="e.g. Dr. Mehta" value={form.doctorName} onChangeText={set("doctorName")} />
               <Input label="Facility / Lab Name *" placeholder="e.g. City Hospital" value={form.facilityName} onChangeText={set("facilityName")} />
               <Input label="Address *" placeholder="e.g. 12 MG Road, room 4" value={form.address} onChangeText={set("address")} />
-              <Input label="Date & Time * (ISO)" placeholder="YYYY-MM-DDTHH:MM" value={form.dateTime} onChangeText={set("dateTime")} />
+              <DateTimeField label="Date & Time *" value={dateTime} onChange={setDateTime} />
               <Input label="Notes" placeholder="Bring previous reports…" value={form.notes} onChangeText={set("notes")} multiline numberOfLines={3} style={{ height: 80, textAlignVertical: "top" } as any} />
               <Button title="Create Appointment" onPress={createAppt} loading={saving} color={Colors.warning} />
             </ScrollView>

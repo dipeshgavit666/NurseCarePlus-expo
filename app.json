@@ -54,7 +54,8 @@
         {
           "locationWhenInUsePermission": "Allow NurseCare+ to access your location for SOS emergencies."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true

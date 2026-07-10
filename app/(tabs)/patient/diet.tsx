@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl } from "react-native
 import { SafeAreaView } from "react-native-safe-area-context";
 import { patientApi, Patient } from "../../../src/api";
 import { useRoleGuard } from "../../../src/hooks/useRoleGuard";
-import { getDietPlanForDiagnosis, DietItem } from "../../../src/data/dietPlans";
+import { getEffectiveDietPlan, DietItem } from "../../../src/data/dietPlans";
 import { Card, Row, SectionHeader, LoadingScreen } from "../../../src/components/common/UI";
 import { Colors, Spacing, Radius } from "../../../src/theme";
 
@@ -24,7 +24,7 @@ export default function Diet() {
   if (guard) return guard;
   if (loading) return <LoadingScreen label="Loading your diet plan…" />;
 
-  const plan = getDietPlanForDiagnosis(patient?.diagnosis);
+  const plan = getEffectiveDietPlan(patient?.diagnosis, patient?.customDiet);
 
   return (
     <SafeAreaView style={s.safe}>

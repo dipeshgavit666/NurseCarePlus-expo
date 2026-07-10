@@ -19,7 +19,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
 }
 
 export async function scheduleMedicationAlarms(
-  medications: Medication[]
+  medications: Medication[],
 ): Promise<Record<string, string>> {
   const granted = await requestNotificationPermission();
   if (!granted) return {};
@@ -75,4 +75,44 @@ export async function sendMissedDoseAlert(medName: string): Promise<void> {
 
 export async function getScheduledAlarms() {
   return Notifications.getAllScheduledNotificationsAsync();
+}
+
+export async function scheduleAppointmentReminders(
+  appointments: {
+    _id: string;
+    title: string;
+    dateTime: string;
+    facilityName: string;
+  }[],
+) {
+  const granted = await requestNotificationPermission();
+  if (!granted) return;
+
+  for (const appt of appointments) {
+    const apptTime = new Date(appt.dateTime).getTime();
+    const now = Date.now();
+
+    const oneDayBefore = apptTime - 24 * 60 * 60 * 1000;
+    const twoHoursBefore = apptTime - 2 * 60 * 60 * 1000;
+
+    for (const [label, triggerTime] of [
+      ["Tomorrow", oneDayBefore],
+      ["In 2 hours", twoHoursBefore],
+    ] as const) {
+      if (triggerTime > now) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "📅 Upcoming appointment",
+            body: `${appt.title} at ${appt.facilityName} — ${label.toLowerCase()}`,
+            data: { type: "appointment", appointmentId: appt._id },
+            sound: true,
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: new Date(triggerTime),
+          },
+        });
+      }
+    }
+  }
 }
