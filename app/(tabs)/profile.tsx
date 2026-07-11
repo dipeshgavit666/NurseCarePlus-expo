@@ -5,7 +5,6 @@ import { router } from "expo-router";
 import { useAuth } from "../../src/context/AuthContext";
 import { Card, Avatar, InfoRow, Button, Divider } from "../../src/components/common/UI";
 import { Colors, Spacing, Radius } from "../../src/theme";
-import { BASE_URL } from "../../src/api/client";
 
 const ROLE_META: Record<string, { emoji: string; color: string; label: string }> = {
   nurse:   { emoji: "👩‍⚕️", color: Colors.nurse,   label: "Nurse / Admin" },
@@ -50,13 +49,6 @@ export default function Profile() {
           <InfoRow label="Name" value={user?.name ?? "—"} />
           <InfoRow label="Email" value={user?.email ?? "—"} />
           <InfoRow label="Role" value={meta.label} />
-          <InfoRow label="User ID" value={user?._id ?? "—"} mono />
-        </Card>
-
-        <Card style={s.card}>
-          <Text style={s.cardHeading}>Connection</Text>
-          <Divider />
-          <InfoRow label="API URL" value={BASE_URL} mono />
         </Card>
 
         <Button title="Sign Out" onPress={handleLogout} variant="danger" loading={loading} icon="🚪" />
