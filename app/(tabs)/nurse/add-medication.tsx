@@ -16,7 +16,8 @@ const PRESETS = [
 
 export default function AddMedication() {
   const guard = useRoleGuard(["nurse"]);
-  const { patientId } = useLocalSearchParams<{ patientId: string }>();
+  const params = useLocalSearchParams<{ patientId: string | string[] }>();
+  const patientId = Array.isArray(params.patientId) ? params.patientId[0] : params.patientId;
   const [name, setName] = useState("");
   const [dose, setDose] = useState("");
   const [unit, setUnit] = useState("mg");
@@ -40,27 +41,33 @@ export default function AddMedication() {
   };
 
   const submit = async () => {
-    if (!name.trim() || !dose.trim() || times.length === 0) {
-      Alert.alert("Required", "Name, dose, and at least one time slot are required.");
-      return;
-    }
-    try {
-      setSaving(true);
-      await medicationApi.create({
-        patientId,
-        name: name.trim(),
-        dose: dose.trim(),
-        unit,
-        instructions: instructions.trim(),
-        schedule: times.map(time => ({ time, taken: false })),
-        isOngoing: ongoing,
-        active: true,
-      });
-      Alert.alert("Saved", `${name} has been assigned.`);
-      router.back();
-    } catch (e: any) { Alert.alert("Error", e.message); }
-    finally { setSaving(false); }
-  };
+  if (!patientId) {
+    Alert.alert("Error", "Missing patient reference. Go back and try again.");
+    return;
+  }
+  if (!name.trim() || !dose.trim() || times.length === 0) {
+    Alert.alert("Required", "Name, dose, and at least one time slot are required.");
+    return;
+  }
+  try {
+    setSaving(true);
+    await medicationApi.create({
+      patientId,
+      name: name.trim(),
+      dose: dose.trim(),
+      unit,
+      instructions: instructions.trim(),
+      schedule: times.map(time => ({ time, taken: false })),
+      isOngoing: ongoing,
+      active: true,
+      startDate: new Date().toISOString() as any,
+    });
+    Alert.alert("Saved", `${name.trim()} added to the patient's medications.`);
+    router.back();
+  } catch (e: any) {
+    Alert.alert("Error", e?.message ?? "Something went wrong. Please try again.");
+  } finally { setSaving(false); }
+};
 
   return (
     <SafeAreaView style={s.safe}>

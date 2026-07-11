@@ -16,7 +16,8 @@ const TYPES: { key: Appointment["type"]; label: string; emoji: string; color: st
 
 export default function NurseAddAppointment() {
   const guard = useRoleGuard(["nurse"]);
-  const { patientId } = useLocalSearchParams<{ patientId: string }>();
+  const params = useLocalSearchParams<{ patientId: string | string[] }>();
+  const patientId = Array.isArray(params.patientId) ? params.patientId[0] : params.patientId;
   const [type, setType] = useState<Appointment["type"]>("follow_up");
   const [title, setTitle] = useState("");
   const [doctorName, setDoctorName] = useState("");

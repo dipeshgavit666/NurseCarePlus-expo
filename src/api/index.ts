@@ -38,6 +38,7 @@ export interface Medication {
   schedule: { time: string; taken: boolean; takenAt?: string }[];
   isOngoing: boolean;
   active: boolean;
+  startDate: string;
 }
 
 export interface MedicationLog {

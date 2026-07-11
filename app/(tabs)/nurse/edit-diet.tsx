@@ -10,7 +10,8 @@ import { Colors, Spacing, Radius } from "../../../src/theme";
 
 export default function EditDiet() {
   const guard = useRoleGuard(["nurse"]);
-  const { patientId } = useLocalSearchParams<{ patientId: string }>();
+  const params = useLocalSearchParams<{ patientId: string | string[] }>();
+  const patientId = Array.isArray(params.patientId) ? params.patientId[0] : params.patientId;
   const [loading, setLoading] = useState(true);
   const [patient, setPatient] = useState<Patient | null>(null);
   const [eatText, setEatText] = useState("");
