@@ -7,10 +7,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { patientApi, appointmentApi, Appointment } from "../../../src/api";
 import { useAuth } from "../../../src/context/AuthContext";
 import { useRoleGuard } from "../../../src/hooks/useRoleGuard";
+import { DateTimeField } from "../../../src/components/common/DateTimeField";
+import { formatDate, formatTime } from "../../../src/utils/date";
 import { Card, Row, SectionHeader, EmptyState, LoadingScreen, Button, Input, Badge } from "../../../src/components/common/UI";
 import { Colors, Spacing, Radius } from "../../../src/theme";
-import { DateTimeField } from "../../../src/components/common/DateTimeField";
-import { scheduleAppointmentReminders } from "../../../src/services/notifications";
 
 const TYPES: { key: Appointment["type"]; label: string; emoji: string; color: string }[] = [
   { key: "follow_up", label: "Follow-up", emoji: "🩺", color: Colors.primary },
@@ -28,16 +28,13 @@ export default function Appointments() {
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [type, setType] = useState<Appointment["type"]>("follow_up");
-  const [form, setForm] = useState({ title: "", doctorName: "", facilityName: "", address: "", dateTime: "", notes: "" });
+  const [form, setForm] = useState({ title: "", doctorName: "", facilityName: "", address: "", notes: "" });
   const [dateTime, setDateTime] = useState(new Date());
 
   const set = (k: keyof typeof form) => (v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const init = async () => {
     try {
-      // Nurse landing here has no "own" patient — for now this screen assumes
-      // a patient context; nurses reach it from a patient's profile in a
-      // future iteration. Patient flow works end-to-end.
       const { patient } = await patientApi.getMe();
       setPatientId(patient._id);
       const { appointments: list } = await appointmentApi.getAll(patient._id);
@@ -52,14 +49,30 @@ export default function Appointments() {
   if (loading) return <LoadingScreen label="Loading appointments…" />;
 
   const createAppt = async () => {
-    if (!form.title || !form.facilityName || !form.address || !form.dateTime) {
-      Alert.alert("Required", "Title, facility, address and date/time are required."); return;
+    if (!form.title.trim() || !form.facilityName.trim() || !form.address.trim()) {
+      Alert.alert("Required", "Title, facility, and address are required.");
+      return;
+    }
+    if (!patientId) {
+      Alert.alert("Error", "Could not identify your patient profile.");
+      return;
     }
     try {
       setSaving(true);
-      await appointmentApi.create({ ...form, type, patientId: patientId!, dateTime: form.dateTime as any, completed: false });
+      await appointmentApi.create({
+        patientId,
+        type,
+        title: form.title.trim(),
+        doctorName: form.doctorName.trim() || undefined,
+        facilityName: form.facilityName.trim(),
+        address: form.address.trim(),
+        dateTime: dateTime.toISOString() as any,
+        notes: form.notes.trim() || undefined,
+        completed: false,
+      });
       setShowModal(false);
-      setForm({ title: "", doctorName: "", facilityName: "", address: "", dateTime: "", notes: "" });
+      setForm({ title: "", doctorName: "", facilityName: "", address: "", notes: "" });
+      setDateTime(new Date());
       init();
     } catch (e: any) { Alert.alert("Error", e.message); }
     finally { setSaving(false); }
@@ -143,14 +156,14 @@ function ApptCard({ appt, faded, canComplete, onComplete }: { appt: Appointment;
       <Row style={{ gap: 12 }}>
         <View style={s.dateBox}>
           <Text style={s.dateDay}>{date.getDate()}</Text>
-          <Text style={s.dateMonth}>{date.toLocaleDateString("en-IN", { month: "short" })}</Text>
+          <Text style={s.dateMonth}>{date.toLocaleDateString("en-GB", { month: "short" })}</Text>
         </View>
         <View style={{ flex: 1 }}>
           <Text style={s.apptTitle}>{meta?.emoji} {appt.title}</Text>
           {appt.doctorName && <Text style={s.apptMeta}>👨‍⚕️ {appt.doctorName}</Text>}
           <Text style={s.apptMeta}>📍 {appt.facilityName}</Text>
           <Text style={s.apptTime}>
-            🕐 {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            🕐 {formatTime(appt.dateTime)}
             {isToday && <Text style={{ color: Colors.danger }}>  · Today</Text>}
             {isTomorrow && <Text style={{ color: Colors.warning }}>  · Tomorrow</Text>}
           </Text>
