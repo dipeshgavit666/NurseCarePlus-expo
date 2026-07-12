@@ -55,7 +55,14 @@
           "locationWhenInUsePermission": "Allow NurseCare+ to access your location for SOS emergencies."
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+    "expo-image-picker",
+    {
+      "photosPermission": "Allow NurseCare+ to access your photos to attach a medicine photo.",
+      "cameraPermission": "Allow NurseCare+ to use the camera to photograph a medicine."
+    }
+  ]
     ],
     "experiments": {
       "typedRoutes": true

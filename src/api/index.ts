@@ -39,6 +39,7 @@ export interface Medication {
   isOngoing: boolean;
   active: boolean;
   startDate: string;
+  endDate?: string;
 }
 
 export interface MedicationLog {
@@ -142,6 +143,11 @@ export const medicationApi = {
   getHistory: (patientId: string, days = 7) =>
     http.get<{ logs: MedicationLog[] }>(
       `/medications/patient/${patientId}/history?days=${days}`,
+    ),
+  uploadPhoto: (medicationId: string, formData: FormData) =>
+    http.postForm<{ photoUrl: string }>(
+      `/medications/${medicationId}/photo`,
+      formData,
     ),
 };
 

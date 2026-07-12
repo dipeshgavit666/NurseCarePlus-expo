@@ -59,6 +59,8 @@ export default function TabsLayout() {
       <Tabs.Screen name="family/dashboard" options={{ title: "Dashboard", tabBarIcon: ({ focused }) => <Icon e="👨‍👩‍👧" focused={focused} />, href: isFamily ? undefined : null }} />
       <Tabs.Screen name="family/home" options={{ href: null }} />
 
+      <Tabs.Screen name="nurse/add-medication" options={{ href: null }} />
+
       <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ focused }) => <Icon e="👤" focused={focused} /> }} />
     </Tabs>
   );

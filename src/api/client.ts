@@ -4,7 +4,9 @@ export const BASE_URL =
   (process.env.EXPO_PUBLIC_API_URL as string) ||
   "https://nursecareplus-api.onrender.com/api";
 
-async function getHeaders(isMultipart = false): Promise<Record<string, string>> {
+async function getHeaders(
+  isMultipart = false,
+): Promise<Record<string, string>> {
   const token = await AsyncStorage.getItem("token");
   const headers: Record<string, string> = {};
   if (!isMultipart) headers["Content-Type"] = "application/json";
@@ -34,7 +36,12 @@ export const http = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body: unknown) =>
     request<T>(path, { method: "POST", body: JSON.stringify(body) }),
+  postForm: <T>(path: string, formData: FormData) =>
+    request<T>(path, { method: "POST", body: formData }),
   patch: <T>(path: string, body?: unknown) =>
-    request<T>(path, { method: "PATCH", body: body ? JSON.stringify(body) : undefined }),
+    request<T>(path, {
+      method: "PATCH",
+      body: body ? JSON.stringify(body) : undefined,
+    }),
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
 };
